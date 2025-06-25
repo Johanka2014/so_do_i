@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Expressing Agreement: "So do I" & "Neither do I"</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #1e3a8a; /* A dark blue fallback */
+            color: #F3F4F6;
+            position: relative; /* Required for the pseudo-element overlay */
+            z-index: 1; /* Establish a stacking context */
+        }
+        /* Gradient Background Layer */
+        body::before {
+            content: "";
+            position: fixed; /* Covers the whole viewport */
+            top: 0; right: 0; bottom: 0; left: 0;
+            background: linear-gradient(to right, #60a5fa, #3b82f6, #1d4ed8);
+            z-index: -2;
+        }
+        /* Blur Texture Overlay */
+        body::after {
+            content: "";
+            position: fixed; /* Covers the whole viewport */
+            top: 0; right: 0; bottom: 0; left: 0;
+            /* A subtle noise texture created with SVG */
+            background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 800"><filter id="f"><feTurbulence type="fractalNoise" baseFrequency="0.7" numOctaves="2" stitchTiles="stitch"/></filter><rect width="100%" height="100%" filter="url(%23f)"/></svg>');
+            background-size: cover;
+            opacity: 0.08; /* Make the texture very subtle */
+            filter: blur(0.5px); /* Adds to the "blurry" feel */
+            z-index: -1; /* Place it between the gradient and the content */
+            pointer-events: none;
+        }
+        .slide {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 4rem 2rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            scroll-snap-align: start;
+        }
+        .slide-content {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 2rem;
+            width: 100%;
+            max-width: 1200px;
+            align-items: center;
+        }
+        @media (min-width: 768px) {
+            .slide-content {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+        .card {
+            background-color: rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 1rem;
+            padding: 2rem;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+        .btn {
+            display: inline-block;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-weight: 700;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .btn-primary {
+            background: linear-gradient(to right, #3b82f6, #60a5fa);
+            color: #ffffff;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(59, 130, 246, 0.25);
+        }
+        .quiz-option {
+            border: 2px solid #4B5563;
+            transition: all 0.2s ease;
+        }
+        .quiz-option:hover {
+            border-color: #60a5fa;
+        }
+        .quiz-option.selected {
+            border-color: #3b82f6;
+            background-color: rgba(59, 130, 246, 0.2);
+        }
+        .quiz-option.correct {
+            border-color: #10B981;
+            background-color: rgba(16, 185, 129, 0.2);
+        }
+        .quiz-option.incorrect {
+            border-color: #EF4444;
+            background-color: rgba(239, 68, 68, 0.2);
+        }
+        .nav-button {
+            position: fixed;
+            bottom: 2rem;
+            transform: translateX(-50%);
+            background-color: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+            border-radius: 9999px;
+            padding: 0.5rem;
+            display: flex;
+            gap: 0.5rem;
+            z-index: 50;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .gap-fill-input {
+            width: 80px;
+            background-color: rgba(0,0,0,0.2);
+            border: 1px solid #4B5563;
+            border-radius: 0.25rem;
+            padding: 0 0.25rem;
+            text-align: center;
+            color: white;
+        }
+        /* Drag and Drop Styles */
+        .draggable-word {
+            cursor: grab;
+            background-color: #3b82f6;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            transition: background-color 0.2s;
+        }
+        .draggable-word:hover {
+            background-color: #60a5fa;
+        }
+        .draggable-word.dragging {
+            opacity: 0.5;
+        }
+        .drop-zone {
+            display: inline-block;
+            width: 100px;
+            height: 36px;
+            border: 2px dashed #4B5563;
+            border-radius: 0.5rem;
+            transition: all 0.2s;
+            text-align: center;
+            vertical-align: middle;
+            line-height: 32px;
+            font-weight: bold;
+        }
+        .drop-zone.drag-over {
+            border-color: #a5b4fc;
+            background-color: rgba(165, 180, 252, 0.2);
+        }
+        .drop-zone.correct {
+             border-color: #10B981;
+             background-color: rgba(16, 185, 129, 0.2);
+             color: #10B981;
+        }
+         .drop-zone.incorrect {
+             border-color: #EF4444;
+             background-color: rgba(239, 68, 68, 0.2);
+             color: #EF4444;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Slide 1: Title -->
+    <section id="slide-1" class="slide">
+        <div class="slide-content">
+            <div class="text-center md:text-left">
+                <h1 class="text-4xl md:text-6xl font-black uppercase tracking-wider text-white">Expressing Agreement</h1>
+                <h2 class="text-3xl md:text-5xl font-bold mt-2 text-yellow-300">"So do I" & "Neither do I"</h2>
+                <p class="mt-6 text-lg text-gray-200 max-w-2xl mx-auto md:mx-0">This lesson explores how to express agreement in English conversations using "So do I" and "Neither do I" structures. We'll cover both positive and negative forms through explanation and practice activities.</p>
+                <p class="mt-4 text-sm text-gray-400">by Joanna McKeogh</p>
+                <a href="#slide-2" class="btn btn-primary mt-8">Start Learning</a>
+            </div>
+            <div>
+                <img src="https://johanka2014.github.io/so_do_i/fist_bump.png"
+                     onerror="this.onerror=null;this.src='https://placehold.co/600x600/1e3a8a/F3F4F6?text=Man+and+woman+agreeing';"
+                     alt="A man and a woman giving a fist bump in agreement" class="rounded-lg shadow-2xl object-cover w-full h-[55vh] md:h-auto">
+            </div>
+        </div>
+    </section>
+
+    <!-- Slide 2: Positive Agreement -->
+    <section id="slide-2" class="slide">
+        <div class="slide-content">
+             <div>
+                <img src="https://johanka2014.github.io/so_do_i/sharing_coffee.png"
+                     onerror="this.onerror=null;this.src='https://placehold.co/600x400/1e3a8a/F3F4F6?text=People+sharing+coffee';"
+                     alt="Two people enjoying coffee together" class="rounded-lg shadow-2xl w-full h-auto">
+            </div>
+            <div class="card">
+                <h2 class="text-3xl font-bold text-white">Positive Agreement: "So do I"</h2>
+                <p class="mt-4 text-gray-200">We use <code class="bg-black/20 p-1 rounded-md text-yellow-300">So + auxiliary verb + subject</code> to express positive agreement.</p>
+                <p class="mt-2 text-gray-200">This structure means "I also do that" and mirrors the auxiliary verb from the first statement.</p>
+                <ul class="mt-6 space-y-4 text-lg">
+                    <li><span class="text-yellow-300 font-bold">Present:</span> "I enjoy coffee." <span class="text-blue-200 font-semibold">- "So do I."</span></li>
+                    <li><span class="text-yellow-300 font-bold">Past:</span> "I went shopping." <span class="text-blue-200 font-semibold">- "So did I."</span></li>
+                    <li><span class="text-yellow-300 font-bold">Modal:</span> "I can swim." <span class="text-blue-200 font-semibold">- "So can I."</span></li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <!-- Slide 3: Negative Agreement -->
+    <section id="slide-3" class="slide">
+        <div class="slide-content">
+            <div class="card">
+                <h2 class="text-3xl font-bold text-white">Negative Agreement: "Neither do I"</h2>
+                <p class="mt-4 text-gray-200">We use <code class="bg-black/20 p-1 rounded-md text-yellow-300">Neither + auxiliary verb + subject</code> to express negative agreement.</p>
+                <p class="mt-2 text-gray-200">This means "I also do not" and follows the same pattern with auxiliaries.</p>
+                 <ul class="mt-6 space-y-4 text-lg">
+                    <li><span class="text-yellow-300 font-bold">Present:</span> "I don't like rain." <span class="text-blue-200 font-semibold">- "Neither do I."</span></li>
+                    <li><span class="text-yellow-300 font-bold">Past:</span> "I didn't finish." <span class="text-blue-200 font-semibold">- "Neither did I."</span></li>
+                    <li><span class="text-yellow-300 font-bold">Modal:</span> "I can't swim." <span class="text-blue-200 font-semibold">- "Neither can I."</span></li>
+                </ul>
+            </div>
+            <div>
+                <img src="https://johanka2014.github.io/so_do_i/couple_in_rain.png"
+                     onerror="this.onerror=null;this.src='https://placehold.co/600x400/1e3a8a/F3F4F6?text=Couple+in+rain';"
+                     alt="Couple standing in the rain under an umbrella" class="rounded-lg shadow-2xl object-cover w-full h-[55vh] md:h-auto">
+            </div>
+        </div>
+    </section>
+
+    <!-- Slide 4: Structure -->
+    <section id="slide-4" class="slide">
+        <div class="slide-content">
+             <!-- Recreated Flowchart -->
+            <div class="flex flex-col items-center justify-center p-4 h-full">
+                <div class="text-center bg-black/20 p-3 rounded-lg shadow-lg border border-yellow-300/50">
+                    <p class="text-sm text-gray-400">Example Sentence</p>
+                    <p class="text-lg font-bold text-white">"They have been studying diligently"</p>
+                </div>
+                <div class="text-5xl text-yellow-300 my-2">↓</div>
+                <div class="w-48 text-center bg-yellow-300 text-gray-900 p-3 rounded-full shadow-lg font-bold">Subject (They)</div>
+                <div class="text-5xl text-white my-2">↓</div>
+                <div class="w-64 text-center bg-black/20 p-3 rounded-lg shadow-lg border border-white/10">
+                    <p class="font-bold text-blue-300">Auxiliary Verb</p>
+                    <p class="text-white">(have been)</p>
+                </div>
+                <div class="text-5xl text-white my-2">↓</div>
+                 <div class="w-64 text-center bg-black/20 p-3 rounded-lg shadow-lg border border-white/10">
+                    <p class="font-bold text-blue-300">Main Verb</p>
+                    <p class="text-white">(studying)</p>
+                </div>
+                 <div class="text-5xl text-white my-2">↓</div>
+                <div class="w-48 text-center bg-yellow-300 text-gray-900 p-3 rounded-full shadow-lg font-bold">Adverb (diligently)</div>
+            </div>
+            <div class="card">
+                <h2 class="text-3xl font-bold text-white">Structures and Auxiliary Verbs</h2>
+                <div class="mt-6 space-y-4">
+                    <div>
+                        <h3 class="font-bold text-yellow-300 text-xl">1. Original Statement</h3>
+                        <p class="text-gray-200 ml-4">Contains an auxiliary verb (e.g., <code class="bg-black/20 p-1 rounded-md">am, do, can, will</code>).</p>
+                        <p class="text-gray-400 ml-4 italic">"I <span class="text-yellow-300">am</span> tired." / "We <span class="text-yellow-300">don't</span> smoke."</p>
+                    </div>
+                     <div>
+                        <h3 class="font-bold text-yellow-300 text-xl">2. Match the Auxiliary</h3>
+                        <p class="text-gray-200 ml-4">Use the same auxiliary in your response.</p>
+                         <p class="text-gray-400 ml-4 italic">"So <span class="text-blue-200">am</span> I." / "Neither <span class="text-blue-200">do</span> I."</p>
+                    </div>
+                     <div>
+                        <h3 class="font-bold text-yellow-300 text-xl">3. Complete Agreement</h3>
+                        <p class="text-gray-200 ml-4">The structure shows you agree with the statement.</p>
+                         <p class="text-gray-400 ml-4 italic">Positive or negative agreement is now clear.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Slide 5: The Story of the Jims -->
+    <section id="slide-5" class="slide">
+        <div class="slide-content">
+            <div class="card">
+                <h2 class="text-3xl font-bold text-white">A Tale of Two Jims</h2>
+                 <p class="mt-4 text-gray-200">Some years ago, two identical twins were born in Minnesota USA. They were adopted by two different families. The two new families both called their babies Jim. Jim Springer never knew that Jim Lewis existed. But when they were 40 years old they met for the first time and they had a conversation something like this...</p>
+                 <div class="mt-6 text-gray-200 space-y-2">
+                     <p>1. Who are Jim Springer and Jim Lewis?</p>
+                     <p>2. Why didn't they know each other?</p>
+                     <p>3. When did they meet?</p>
+                 </div>
+            </div>
+            <div>
+                <img src="https://johanka2014.github.io/so_do_i/jim.jpg"
+                     onerror="this.onerror=null;this.src='https://placehold.co/600x400/1e3a8a/F3F4F6?text=The+Two+Jims';"
+                     alt="Profile photos of the two identical twins, Jim Springer and Jim Lewis" class="rounded-lg shadow-2xl object-cover w-full h-[55vh] md:h-auto">
+            </div>
+        </div>
+    </section>
+
+    <!-- Slide 6: Audio Listening Exercise -->
+    <section id="slide-6" class="slide">
+        <div class="max-w-4xl w-full">
+            <div class="card mb-8">
+                 <h2 class="text-3xl font-bold text-white text-center">Listen and Complete</h2>
+                 <p class="mt-4 text-gray-200 text-center">Listen to the conversation and fill in the gaps below.</p>
+                 <audio controls class="mt-8 w-full">
+                     <source src="https://johanka2014.github.io/so_do_i/30_Track_30_-_8.9.mp3" type="audio/mpeg">
+                     Your browser does not support the audio element.
+                 </audio>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4" id="practice3">
+                <div class="space-y-3 text-lg p-6 card">
+                    <p><b class="text-yellow-300">A:</b> Hi! I'm Jim.</p>
+                    <p><b class="text-blue-300">B:</b> So <input type="text" class="gap-fill-input" data-answer="am"> I. Great to meet you. Are you married, Jim?</p>
+                    <p><b class="text-yellow-300">A:</b> Yes...well, I've been married twice.</p>
+                    <p><b class="text-blue-300">B:</b> Yeah? So <input type="text" class="gap-fill-input" data-answer="have"> I. Do you have any children?</p>
+                    <p><b class="text-yellow-300">A:</b> I have one son.</p>
+                    <p><b class="text-blue-300">B:</b> So <input type="text" class="gap-fill-input" data-answer="have"> I. What's his name?</p>
+                    <p><b class="text-yellow-300">A:</b> James.</p>
+                    <p><b class="text-blue-300">B:</b> That's amazing! My son's name is James too.</p>
+                    <p><b class="text-yellow-300">A:</b> Did you go to university, Jim?</p>
+                    <p><b class="text-blue-300">B:</b> No, I didn't.</p>
+                    <p><b class="text-yellow-300">A:</b> Neither <input type="text" class="gap-fill-input" data-answer="did"> I. I was a terrible student.</p>
+                </div>
+                <div class="space-y-3 text-lg p-6 card">
+                    <p><b class="text-blue-300">B:</b> So <input type="text" class="gap-fill-input" data-answer="was"> I. What do you like doing in your free time, Jim?</p>
+                    <p><b class="text-yellow-300">A:</b> I like making things, especially with wood.</p>
+                    <p><b class="text-blue-300">B:</b> That's incredible! So <input type="text" class="gap-fill-input" data-answer="do"> I.</p>
+                    <p><b class="text-yellow-300">A:</b> But I don't do any exercise at all. Look at me.</p>
+                    <p><b class="text-blue-300">B:</b> Don't worry. Neither <input type="text" class="gap-fill-input" data-answer="do"> I.</p>
+                     <p><b class="text-yellow-300">A:</b> Do you smoke?</p>
+                    <p><b class="text-blue-300">B:</b> Yes. I smoke Salem cigarettes.</p>
+                    <p><b class="text-yellow-300">A:</b> So <input type="text" class="gap-fill-input" data-answer="do"> I! What car do you have?</p>
+                    <p><b class="text-blue-300">B:</b> A Chevrolet.</p>
+                    <p><b class="text-yellow-300">A:</b> Me too! Let's go and have a drink. What beer do you drink?</p>
+                    <p><b class="text-blue-300">B:</b> Miller Lite.</p>
+                    <p><b class="text-yellow-300">A:</b> So <input type="text" class="gap-fill-input" data-answer="do"> I!</p>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Slide 7: Grammar Check -->
+    <section id="slide-7" class="slide">
+        <div class="slide-content">
+            <div>
+                 <img src="https://johanka2014.github.io/so_do_i/same_car.png"
+                     onerror="this.onerror=null;this.src='https://placehold.co/600x600/1e3a8a/F3F4F6?text=Placeholder';"
+                     alt="Two identical vintage blue Chevrolet cars parked side-by-side" class="rounded-lg shadow-2xl object-cover w-full h-[55vh] md:h-auto">
+            </div>
+            <div class="card" id="practice4">
+                <h2 class="text-3xl font-bold text-white">Grammar: so, neither + auxiliaries</h2>
+                <p class="mt-4 text-gray-200">Look at the dialogue again. Write one phrase that the twins use...</p>
+                <div class="mt-6 space-y-6 text-lg">
+                    <div>
+                        <label for="q-positive" class="block">...when they have something <span class="font-bold text-green-400">[+]</span> in common.</label>
+                        <input type="text" id="q-positive" data-answer="so am i" class="mt-2 bg-black/20 border-2 border-gray-600 rounded-md p-2 w-full text-white focus:outline-none focus:border-blue-400 transition">
+                    </div>
+                    <div>
+                        <label for="q-negative" class="block">...when they have something <span class="font-bold text-red-400">[-]</span> in common.</label>
+                        <input type="text" id="q-negative" data-answer="neither did i" class="mt-2 bg-black/20 border-2 border-gray-600 rounded-md p-2 w-full text-white focus:outline-none focus:border-blue-400 transition">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Slide 8: Animated Drag and Drop -->
+    <section id="slide-8" class="slide">
+        <div class="slide-content">
+            <!-- Left side: Drag and Drop Exercise -->
+            <div class="card p-6 md:col-span-1">
+                 <h2 class="text-2xl font-bold text-white mb-4">Complete the Phrases</h2>
+                 <p class="text-gray-300 mb-6">Drag the words to the correct gaps.</p>
+                 <div id="word-bank" class="flex flex-wrap gap-4 mb-8 p-4 bg-black/20 rounded-lg justify-center">
+                     <div class="draggable-word" draggable="true" data-word="so">so</div>
+                     <div class="draggable-word" draggable="true" data-word="like">like</div>
+                     <div class="draggable-word" draggable="true" data-word="neither">neither</div>
+                     <div class="draggable-word" draggable="true" data-word="as">as</div>
+                     <div class="draggable-word" draggable="true" data-word="similar">similar</div>
+                 </div>
+                 <div id="sentences" class="space-y-4 text-lg">
+                    <div class="flex items-center gap-2" data-sentence="1">1. Jim Springer looks exactly <div class="drop-zone" data-answer="like"></div> Jim Lewis.</div>
+                    <div class="flex items-center gap-2" data-sentence="2">2. Jim Springer's son has the same name <div class="drop-zone" data-answer="as"></div> Jim Lewis's son.</div>
+                    <div class="flex items-center gap-2" data-sentence="4">3. Jim Springer likes baseball and <div class="drop-zone" data-answer="so"></div> does Jim Lewis.</div>
+                    <div class="flex items-center gap-2" data-sentence="5">4. Jim Lewis doesn't like basketball and <div class="drop-zone" data-answer="neither"></div> does Jim Springer.</div>
+                    <div class="flex items-center gap-2" data-sentence="6">5. Dr Bouchard didn't expect them to be so <div class="drop-zone" data-answer="similar"></div> to each other.</div>
+                 </div>
+            </div>
+            <!-- Right side: Image Panel -->
+            <div class="flex items-center justify-center">
+                <img src="https://johanka2014.github.io/so_do_i/baseball.png" 
+                     alt="A baseball player hitting a ball" 
+                     class="rounded-lg shadow-2xl object-cover w-full h-[55vh] md:h-auto">
+            </div>
+        </div>
+    </section>
+
+    <!-- Slide 9: Guided Practice 1 -->
+    <section id="slide-9" class="slide">
+        <div class="slide-content">
+             <div>
+                <img src="https://images.pexels.com/photos/4145153/pexels-photo-4145153.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1"
+                     onerror="this.onerror=null;this.src='https://placehold.co/600x400/1e3a8a/F3F4F6?text=Students+studying';"
+                     alt="Two students studying together at a desk" class="rounded-lg shadow-2xl object-cover w-full h-full">
+            </div>
+            <div class="card">
+                <h2 class="text-3xl font-bold text-white">Guided Practice: Complete the Response</h2>
+                <p class="mt-2 text-gray-400">Type the correct response and press Enter.</p>
+                <div id="practice1" class="mt-6 space-y-6">
+                    <!-- Practice Item 1 -->
+                    <div class="practice-item">
+                        <label for="q1" class="block text-lg">1. "I like coffee."</label>
+                        <div class="flex items-center gap-2 mt-2">
+                            <input type="text" id="q1" data-answer="so do i" class="bg-black/20 border-2 border-gray-600 rounded-md p-2 w-full text-white focus:outline-none focus:border-blue-400 transition">
+                            <span id="q1-feedback"></span>
+                        </div>
+                    </div>
+                    <!-- Practice Item 2 -->
+                    <div class="practice-item">
+                        <label for="q2" class="block text-lg">2. "I didn't see the film."</label>
+                        <div class="flex items-center gap-2 mt-2">
+                           <input type="text" id="q2" data-answer="neither did i" class="bg-black/20 border-2 border-gray-600 rounded-md p-2 w-full text-white focus:outline-none focus:border-blue-400 transition">
+                            <span id="q2-feedback"></span>
+                        </div>
+                    </div>
+                    <!-- Practice Item 3 -->
+                    <div class="practice-item">
+                        <label for="q3" class="block text-lg">3. "She can swim." (Respond for yourself)</label>
+                        <div class="flex items-center gap-2 mt-2">
+                           <input type="text" id="q3" data-answer="so can i" class="bg-black/20 border-2 border-gray-600 rounded-md p-2 w-full text-white focus:outline-none focus:border-blue-400 transition">
+                            <span id="q3-feedback"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Slide 10: Guided Practice 2 -->
+    <section id="slide-10" class="slide">
+        <div class="w-full max-w-4xl text-center">
+            <h2 class="text-3xl font-bold text-white mb-8">Guided Practice: Choose the Auxiliary</h2>
+            <div class="card p-4 md:p-8">
+                <table class="w-full text-left" id="practice2">
+                    <thead>
+                        <tr class="border-b-2 border-gray-600">
+                            <th class="p-4 text-yellow-300">Original Statement</th>
+                            <th class="p-4 text-yellow-300">Response Structure</th>
+                            <th class="p-4 text-yellow-300">Choose Correct Auxiliary</th>
+                            <th class="p-4 w-16"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Row 1 -->
+                        <tr class="border-b border-gray-700" data-correct-aux="am">
+                            <td class="p-4">"He is happy."</td>
+                            <td class="p-4">"So ___ I."</td>
+                            <td class="p-4">
+                                <div class="flex flex-wrap gap-2">
+                                    <button class="btn quiz-option px-4 py-1">is</button>
+                                    <button class="btn quiz-option px-4 py-1">am</button>
+                                    <button class="btn quiz-option px-4 py-1">do</button>
+                                </div>
+                            </td>
+                            <td class="p-4"><span class="feedback text-2xl"></span></td>
+                        </tr>
+                        <!-- Row 2 -->
+                        <tr class="border-b border-gray-700" data-correct-aux="do">
+                            <td class="p-4">"You don't drive."</td>
+                            <td class="p-4">"Neither ___ I."</td>
+                            <td class="p-4">
+                                <div class="flex flex-wrap gap-2">
+                                    <button class="btn quiz-option px-4 py-1">don't</button>
+                                    <button class="btn quiz-option px-4 py-1">am</button>
+                                    <button class="btn quiz-option px-4 py-1">do</button>
+                                </div>
+                            </td>
+                            <td class="p-4"><span class="feedback text-2xl"></span></td>
+                        </tr>
+                        <!-- Row 3 -->
+                        <tr class="border-b border-gray-700" data-correct-aux="did">
+                            <td class="p-4">"We went early."</td>
+                            <td class="p-4">"So ___ we."</td>
+                            <td class="p-4">
+                                <div class="flex flex-wrap gap-2">
+                                    <button class="btn quiz-option px-4 py-1">did</button>
+                                    <button class="btn quiz-option px-4 py-1">went</button>
+                                    <button class="btn quiz-option px-4 py-1">do</button>
+                                </div>
+                            </td>
+                           <td class="p-4"><span class="feedback text-2xl"></span></td>
+                        </tr>
+                        <!-- Row 4 -->
+                         <tr class="border-b border-gray-700" data-correct-aux="will">
+                            <td class="p-4">"I'll be there."</td>
+                            <td class="p-4">"So ___ I."</td>
+                            <td class="p-4">
+                                <div class="flex flex-wrap gap-2">
+                                    <button class="btn quiz-option px-4 py-1">am</button>
+                                    <button class="btn quiz-option px-4 py-1">will</button>
+                                    <button class="btn quiz-option px-4 py-1">'ll</button>
+                                </div>
+                            </td>
+                           <td class="p-4"><span class="feedback text-2xl"></span></td>
+                        </tr>
+                         <!-- Row 5 -->
+                        <tr data-correct-aux="have">
+                            <td class="p-4">"They haven't arrived."</td>
+                            <td class="p-4">"Neither ___ we."</td>
+                            <td class="p-4">
+                                <div class="flex flex-wrap gap-2">
+                                    <button class="btn quiz-option px-4 py-1">haven't</button>
+                                    <button class="btn quiz-option px-4 py-1">have</button>
+                                    <button class="btn quiz-option px-4 py-1">did</button>
+                                </div>
+                            </td>
+                            <td class="p-4"><span class="feedback text-2xl"></span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <!-- Slide 11: Free Practice -->
+     <section id="slide-11" class="slide">
+        <div class="slide-content">
+            <div class="card md:order-2">
+                <h2 class="text-3xl font-bold text-white">Free Practice: Conversation</h2>
+                <p class="mt-4 text-gray-200">Work with a partner or write down short conversations using "So do I" and "Neither do I".</p>
+                <h3 class="mt-6 text-xl font-bold text-yellow-300">Conversation Prompts:</h3>
+                 <ul class="mt-4 list-disc list-inside space-y-2 text-gray-200">
+                    <li>Likes/dislikes: food, music, hobbies</li>
+                    <li>Daily habits and routines</li>
+                    <li>Past experiences and activities</li>
+                    <li>Future plans and intentions</li>
+                </ul>
+                <div class="mt-6 p-4 bg-black/20 rounded-lg">
+                    <p class="text-gray-400 italic">"I can't stand horror films."</p>
+                    <p class="text-blue-300 italic text-right">"Neither can I."</p>
+                    <p class="text-gray-400 italic mt-4">"I've visited London twice."</p>
+                    <p class="text-blue-300 italic text-right">"So have I."</p>
+                </div>
+            </div>
+            <div class="md:order-1">
+                <img src="https://images.pexels.com/photos/5676744/pexels-photo-5676744.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1"
+                     onerror="this.onerror=null;this.src='https://placehold.co/600x400/1e3a8a/F3F4F6?text=Group+conversation';"
+                     alt="Group of friends happily chatting and studying together" class="rounded-lg shadow-2xl object-cover w-full h-full">
+            </div>
+        </div>
+    </section>
+
+    <!-- Slide 12: Review -->
+    <section id="slide-12" class="slide">
+        <div class="text-center w-full max-w-5xl">
+            <h2 class="text-4xl font-black text-white">Review and Takeaways</h2>
+            <div class="mt-10 grid md:grid-cols-3 gap-8 text-left">
+                <div class="card">
+                    <h3 class="text-2xl font-bold text-yellow-300">Positive Agreement</h3>
+                    <p class="mt-2 text-lg font-semibold text-blue-200">"So + auxiliary + subject"</p>
+                    <p class="mt-4 text-gray-200">Used for agreeing with <span class="font-bold">positive</span> statements.</p>
+                </div>
+                 <div class="card">
+                    <h3 class="text-2xl font-bold text-yellow-300">Negative Agreement</h3>
+                    <p class="mt-2 text-lg font-semibold text-blue-200">"Neither + auxiliary + subject"</p>
+                    <p class="mt-4 text-gray-200">Used for agreeing with <span class="font-bold">negative</span> statements.</p>
+                </div>
+                 <div class="card">
+                    <h3 class="text-2xl font-bold text-yellow-300">Auxiliary Matching</h3>
+                    <p class="mt-2 text-lg font-semibold text-blue-200">Match the auxiliary verb</p>
+                    <p class="mt-4 text-gray-200">Always match the auxiliary from the first sentence to maintain grammatical consistency.</p>
+                </div>
+            </div>
+            <p class="mt-10 text-lg text-gray-300">Regular practice will help these structures become natural. Remember to listen for the auxiliary verb!</p>
+             <a href="#slide-1" class="btn btn-primary mt-8">Review Again</a>
+        </div>
+    </section>
+
+    <!-- Navigation -->
+    <div id="nav-buttons" class="nav-button left-1/2">
+        <button id="prev-btn" class="p-3 text-blue-200 hover:text-white transition">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
+        </button>
+        <button id="next-btn" class="p-3 text-blue-200 hover:text-white transition">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+        </button>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- Slide Navigation ---
+            const slides = document.querySelectorAll('.slide');
+            const prevBtn = document.getElementById('prev-btn');
+            const nextBtn = document.getElementById('next-btn');
+            let currentSlide = 0;
+
+            const updateNav = () => {
+                const currentId = `slide-${currentSlide + 1}`;
+                history.pushState(null, null, `#${currentId}`);
+                prevBtn.disabled = currentSlide === 0;
+                nextBtn.disabled = currentSlide === slides.length - 1;
+                prevBtn.style.opacity = currentSlide === 0 ? '0.5' : '1';
+                nextBtn.style.opacity = currentSlide === slides.length - 1 ? '0.5' : '1';
+            };
+
+            const goToSlide = (slideIndex) => {
+                if (slideIndex >= 0 && slideIndex < slides.length) {
+                    slides[slideIndex].scrollIntoView({ behavior: 'smooth' });
+                    currentSlide = slideIndex;
+                    updateNav();
+                }
+            };
+            
+            prevBtn.addEventListener('click', () => goToSlide(currentSlide - 1));
+            nextBtn.addEventListener('click', () => goToSlide(currentSlide + 1));
+
+            // Intersection Observer to update current slide
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const slideId = entry.target.id;
+                        currentSlide = parseInt(slideId.split('-')[1]) - 1;
+                        updateNav();
+                    }
+                });
+            }, { threshold: 0.6 });
+
+            slides.forEach(slide => observer.observe(slide));
+
+            // --- Generic Practice Checker ---
+            const checkAnswer = (input) => {
+                const userAnswer = input.value.trim().toLowerCase().replace(/[.,!]/g, '');
+                const correctAnswer = input.dataset.answer;
+                
+                if (userAnswer === correctAnswer) {
+                    input.style.borderColor = '#10B981'; // Green for correct
+                    input.style.color = '#10B981';
+                } else if (userAnswer === "") {
+                    input.style.borderColor = '#4B5563'; // Reset if empty
+                    input.style.color = 'white';
+                }
+                else {
+                    input.style.borderColor = '#EF4444'; // Red for incorrect
+                    input.style.color = '#EF4444';
+                }
+            };
+
+            // Practice 1: Complete the Response
+            document.querySelectorAll('#practice1 input').forEach(input => {
+                input.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        checkAnswer(this);
+                        // Also attach feedback icon
+                        const feedbackEl = document.getElementById(`${this.id}-feedback`);
+                        if(this.style.borderColor === 'rgb(16, 185, 129)') {
+                           feedbackEl.textContent = '✅';
+                        } else {
+                           feedbackEl.textContent = '❌';
+                        }
+                    }
+                });
+            });
+
+            // Practice 3: Gap-fill
+            document.querySelectorAll('#practice3 input').forEach(input => {
+                input.addEventListener('input', function() {
+                     checkAnswer(this);
+                });
+            });
+            
+            // Practice 4: Grammar check
+            document.querySelectorAll('#practice4 input').forEach(input => {
+                input.addEventListener('input', function() {
+                    checkAnswer(this);
+                });
+            });
+
+
+            // Practice 2: Choose the Auxiliary
+            document.getElementById('practice2').addEventListener('click', function(e) {
+                if (e.target.tagName === 'BUTTON' && e.target.classList.contains('quiz-option')) {
+                    const chosenAux = e.target.textContent.trim();
+                    const row = e.target.closest('tr');
+                    const correctAux = row.dataset.correctAux;
+                    const feedbackEl = row.querySelector('.feedback');
+                    
+                    row.querySelectorAll('.quiz-option').forEach(btn => {
+                        btn.classList.remove('selected', 'correct', 'incorrect');
+                    });
+
+                    e.target.classList.add('selected');
+
+                    if (chosenAux === correctAux) {
+                        e.target.classList.add('correct');
+                        feedbackEl.textContent = '✅';
+                    } else {
+                        e.target.classList.add('incorrect');
+                        feedbackEl.textContent = '❌';
+                    }
+                }
+            });
+
+            // Drag and Drop Logic for Slide 8
+            const draggables = document.querySelectorAll('.draggable-word');
+            const dropZones = document.querySelectorAll('.drop-zone');
+
+            draggables.forEach(draggable => {
+                draggable.addEventListener('dragstart', () => {
+                    draggable.classList.add('dragging');
+                });
+
+                draggable.addEventListener('dragend', () => {
+                    draggable.classList.remove('dragging');
+                });
+            });
+
+            dropZones.forEach(zone => {
+                zone.addEventListener('dragover', e => {
+                    e.preventDefault();
+                    zone.classList.add('drag-over');
+                });
+                zone.addEventListener('dragleave', () => {
+                     zone.classList.remove('drag-over');
+                });
+                zone.addEventListener('drop', e => {
+                    e.preventDefault();
+                    zone.classList.remove('drag-over');
+                    const draggingEl = document.querySelector('.dragging');
+                    if (draggingEl) {
+                        const droppedWord = draggingEl.dataset.word;
+                        const correctWord = zone.dataset.answer;
+
+                        if (droppedWord === correctWord) {
+                            zone.textContent = droppedWord;
+                            zone.classList.add('correct');
+                            zone.classList.remove('incorrect');
+                            draggingEl.style.display = 'none'; // Hide the word from the bank
+                            // Trigger animation if the list exists
+                            const sentenceId = zone.closest('[data-sentence]').dataset.sentence;
+                            const similarityListItem = document.querySelector(`#similarity-list [data-similarity="${sentenceId}"]`);
+                            if (similarityListItem) {
+                                similarityListItem.classList.remove('opacity-0');
+                            }
+                        } else {
+                            zone.classList.add('incorrect');
+                            setTimeout(() => zone.classList.remove('incorrect'), 1000);
+                        }
+                    }
+                });
+            });
+
+        });
+    </script>
+</body>
+</html>
