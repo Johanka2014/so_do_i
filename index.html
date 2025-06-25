@@ -50,7 +50,7 @@
         .light-section {
             background: linear-gradient(to left, #60a5fa, #a5b4fc);
         }
-         .light-section .card {
+         .light-section .card, .light-section .text-content {
              background-color: rgba(255, 255, 255, 0.3);
              border-color: rgba(0,0,0,0.1);
              color: #1f2937;
@@ -303,7 +303,7 @@
     <!-- Slide 5: The Story of the Jims -->
     <section id="slide-5" class="slide light-section">
         <div class="slide-content">
-            <div class="text-center md:text-left">
+            <div class="text-content text-center md:text-left">
                 <h2 class="text-4xl md:text-5xl font-bold">A Tale of Two Jims</h2>
                  <p class="mt-4 text-xl">Some years ago, two identical twins were born in Minnesota USA. They were adopted by two different families. The two new families both called their babies Jim. Jim Springer never knew that Jim Lewis existed. But when they were 40 years old they met for the first time and they had a conversation something like this...</p>
             </div>
@@ -421,7 +421,6 @@
         <div class="slide-content md:grid-cols-1">
              <div class="card w-full max-w-4xl mx-auto" id="practice-vocab">
                 <h2 class="text-3xl font-bold text-white mb-4 text-center">Vocabulary: Similarities</h2>
-                <img src="https://johanka2014.github.io/so_do_i/family.png" alt="A cartoon drawing of a diverse family" class="rounded-lg shadow-2xl mb-6 mx-auto w-full max-w-md">
                  <p class="text-gray-300 mb-6 text-center">Complete the text with words from the box.</p>
                  <div id="word-bank-3" class="flex flex-wrap gap-4 mb-8 p-4 bg-black/20 rounded-lg justify-center">
                      <div class="draggable-word" draggable="true" data-word="as">as</div>
@@ -440,33 +439,46 @@
         </div>
     </section>
 
-    <!-- Slide 10: Interactive Reading Quiz -->
+    <!-- Slide 10: Final Practice -->
     <section id="slide-10" class="slide">
         <div class="slide-content md:grid-cols-1">
-             <div class="card w-full max-w-6xl mx-auto" id="reading-quiz">
-                <h2 class="text-3xl font-bold text-white mb-4 text-center">Reading: Don't call us 'the twins'!</h2>
+            <div class="card w-full max-w-4xl mx-auto" id="practice-final">
+                <h2 class="text-3xl font-bold text-white mb-4 text-center">Final Practice</h2>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-8 text-lg">
-                    <div class="space-y-4">
-                        <img src="https://johanka2014.github.io/so_do_i/twins.png" alt="A photo of twin sisters Catherine and Michelle" class="rounded-lg shadow-2xl mx-auto">
-                        <p><strong>How do you think it is different being a twin?</strong> <br> I think it's very different. We've been through exactly the same things: the same birthdays, the same parties, the same first day at school, the same evil maths teacher.</p>
-                        <p><strong>Do you think you and Michelle are more similar than ordinary sisters?</strong> <br> Definitely. If I don't like a film, then neither does she. We pick up the phone at the same time to call each other. If I get ill, so does she.</p>
-                        <p><strong>Do you get on well with Michelle now?</strong> <br> Yes, I see her about once a week, although it doesn't make much difference if we see each other or not. We always know how the other is feeling. I think it's hard not to be close when you have known someone your whole life.</p>
+                    <!-- Column 1 -->
+                    <div>
+                        <h3 class="font-bold text-xl text-yellow-300 mb-4">a) Complete the conversation.</h3>
+                        <div id="word-bank-final" class="flex flex-wrap gap-2 mb-4 p-2 bg-black/20 rounded-lg justify-center">
+                            <div class="draggable-word" draggable="true" data-word="am">am</div>
+                            <div class="draggable-word" draggable="true" data-word="so">so</div>
+                            <div class="draggable-word" draggable="true" data-word="would">would</div>
+                            <div class="draggable-word" draggable="true" data-word="neither">neither</div>
+                            <div class="draggable-word" draggable="true" data-word="were">were</div>
+                        </div>
+                        <div class="space-y-3" id="practice-convo-final">
+                            <p><b>A:</b> Hi, Sue. What are you doing on Saturday?</p>
+                            <p><b>B:</b> I'm going to that lecture on 'finding out about your family'.</p>
+                            <p><b>A:</b> So <span class="drop-zone" data-answer="am"></span> I. I'm not sure how much we'll learn though.</p>
+                            <p><b>B:</b> <span class="drop-zone" data-answer="neither"></span> am I. But I want to learn more about my great-grandparents.</p>
+                            <p><b>A:</b> <span class="drop-zone" data-answer="so"></span> do I. Mine were born at the end of the 19th century!</p>
+                            <p><b>B:</b> So <span class="drop-zone" data-answer="were"></span> mine. Did they live in London?</p>
+                            <p><b>A:</b> Yes, they did. I'd love to find out more about other members of the family too.</p>
+                            <p><b>B:</b> So <span class="drop-zone" data-answer="would"></span> I. Let's go together. I'll pick you up at eight.</p>
+                            <p><b>A:</b> OK. See you then.</p>
+                        </div>
                     </div>
-                    <div class="space-y-4">
-                       <p><strong>What were the best things about being a twin as a child? And now?</strong> <br> You have someone who knows you almost as well as you know yourself, someone who is experiencing all the same things as you. Now it's great because we have almost exactly the same memories. She is my memory sometimes.</p>
-                       <p><strong>What were the worst things?</strong> <br> People called us 'the twins' as if we were one person – I hated that, and so did Michelle. Some people also used to save money and buy one birthday present for both of us! Also Michelle was good at sport and I was terrible – that was difficult for me.</p>
-                        <div class="pt-4" id="true-false-quiz">
-                            <h3 class="font-bold text-xl text-yellow-300 mb-4">Mark the sentences T (True), F (False), or ? (Doesn't say).</h3>
-                            <div class="space-y-3">
-                                <div class="flex justify-between items-center" data-answer="f"><span>1. Michelle is 18 years old.</span> <span class="flex gap-2"><button class="quiz-option px-3 py-1">T</button><button class="quiz-option px-3 py-1">F</button><button class="quiz-option px-3 py-1">?</button></span></div>
-                                <div class="flex justify-between items-center" data-answer="t"><span>2. Catherine and Michelle are always together.</span> <span class="flex gap-2"><button class="quiz-option px-3 py-1">T</button><button class="quiz-option px-3 py-1">F</button><button class="quiz-option px-3 py-1">?</button></span></div>
-                                <div class="flex justify-between items-center" data-answer="f"><span>3. They have the same hobbies.</span> <span class="flex gap-2"><button class="quiz-option px-3 py-1">T</button><button class="quiz-option px-3 py-1">F</button><button class="quiz-option px-3 py-1">?</button></span></div>
-                                <div class="flex justify-between items-center" data-answer="t"><span>4. Catherine always knows how Michelle is feeling.</span> <span class="flex gap-2"><button class="quiz-option px-3 py-1">T</button><button class="quiz-option px-3 py-1">F</button><button class="quiz-option px-3 py-1">?</button></span></div>
-                                <div class="flex justify-between items-center" data-answer="t"><span>5. They like the same films.</span> <span class="flex gap-2"><button class="quiz-option px-3 py-1">T</button><button class="quiz-option px-3 py-1">F</button><button class="quiz-option px-3 py-1">?</button></span></div>
-                                <div class="flex justify-between items-center" data-answer="?"><span>6. They live in the same city.</span> <span class="flex gap-2"><button class="quiz-option px-3 py-1">T</button><button class="quiz-option px-3 py-1">F</button><button class="quiz-option px-3 py-1">?</button></span></div>
-                                <div class="flex justify-between items-center" data-answer="f"><span>7. They're good at all the same things.</span> <span class="flex gap-2"><button class="quiz-option px-3 py-1">T</button><button class="quiz-option px-3 py-1">F</button><button class="quiz-option px-3 py-1">?</button></span></div>
-                                <div class="flex justify-between items-center" data-answer="f"><span>8. Catherine doesn't like having a twin sister.</span> <span class="flex gap-2"><button class="quiz-option px-3 py-1">T</button><button class="quiz-option px-3 py-1">F</button><button class="quiz-option px-3 py-1">?</button></span></div>
-                            </div>
+                    <!-- Column 2 -->
+                    <div>
+                        <h3 class="font-bold text-xl text-yellow-300 mb-4">b) Agree with the statements.</h3>
+                         <div class="space-y-3" id="practice-agree-final">
+                           <p>1. I love dancing. <br/><input type="text" class="gap-fill-input w-full mt-1" data-answer="so do i"></p>
+                           <p>2. I hated our school uniform. <br/><input type="text" class="gap-fill-input w-full mt-1" data-answer="so did i"></p>
+                           <p>3. I don't have any money. <br/><input type="text" class="gap-fill-input w-full mt-1" data-answer="neither do i"></p>
+                           <p>4. I'm not sure what the answer is. <br/><input type="text" class="gap-fill-input w-full mt-1" data-answer="neither am i"></p>
+                           <p>5. I can play the guitar. <br/><input type="text" class="gap-fill-input w-full mt-1" data-answer="so can i"></p>
+                           <p>6. I've only been there once. <br/><input type="text" class="gap-fill-input w-full mt-1" data-answer="so have i"></p>
+                           <p>7. I would love to go to Australia. <br/><input type="text" class="gap-fill-input w-full mt-1" data-answer="so would i"></p>
+                           <p>8. I went camping last year. <br/><input type="text" class="gap-fill-input w-full mt-1" data-answer="so did i"></p>
                         </div>
                     </div>
                 </div>
@@ -474,7 +486,8 @@
         </div>
     </section>
 
-     <section id="slide-11" class="slide">
+    <!-- Slide 11: Free Practice -->
+    <section id="slide-11" class="slide">
         <div class="slide-content">
             <div class="card md:order-2">
                 <h2 class="text-3xl font-bold text-white">Free Practice: Conversation</h2>
@@ -500,7 +513,7 @@
             </div>
         </div>
     </section>
-    
+
     <!-- Slide 12: Review -->
     <section id="slide-12" class="slide">
         <div class="text-center w-full max-w-5xl">
@@ -645,21 +658,39 @@
              // True/False Quiz Logic
             const readingQuiz = document.getElementById('reading-quiz');
             if (readingQuiz) {
-                readingQuiz.querySelectorAll('#true-false-quiz .flex').forEach(question => {
+                const quizQuestions = readingQuiz.querySelectorAll('#true-false-quiz .flex');
+                 quizQuestions.forEach(question => {
                     const buttons = question.querySelectorAll('button');
                     const correctAnswer = question.dataset.answer;
+                    const feedbackIcon = question.querySelector('.feedback-icon');
+                    
                     buttons.forEach(button => {
                         button.addEventListener('click', () => {
                             buttons.forEach(btn => btn.classList.remove('selected', 'correct', 'incorrect'));
                             button.classList.add('selected');
+                            
                             if (button.textContent.toLowerCase() === correctAnswer) {
                                 button.classList.add('correct');
+                                if(feedbackIcon) feedbackIcon.textContent = '✅';
                             } else {
                                 button.classList.add('incorrect');
+                                 if(feedbackIcon) feedbackIcon.textContent = '❌';
                             }
                         });
                     });
                 });
+
+                const resetBtn = document.getElementById('reset-quiz-btn');
+                if(resetBtn) {
+                    resetBtn.addEventListener('click', () => {
+                         quizQuestions.forEach(question => {
+                            const buttons = question.querySelectorAll('button');
+                            const feedbackIcon = question.querySelector('.feedback-icon');
+                            buttons.forEach(btn => btn.classList.remove('selected', 'correct', 'incorrect'));
+                            if(feedbackIcon) feedbackIcon.textContent = '';
+                        });
+                    });
+                }
             }
 
         });
